@@ -11,6 +11,7 @@ import {
 } from '../utils'
 
 const AppStateContext = React.createContext()
+const AppStateDispathcContext = React.createContext()
 
 const initialGrid = Array.from({length: 100}, () =>
   Array.from({length: 100}, () => Math.random() * 100),
@@ -38,25 +39,35 @@ function AppProvider({children}) {
     dogName: '',
     grid: initialGrid,
   })
-  // 🐨 memoize this value with React.useMemo
-  const value = [state, dispatch]
+
   return (
-    <AppStateContext.Provider value={value}>
-      {children}
+    <AppStateContext.Provider value={state}>
+      <AppStateDispathcContext.Provider value={dispatch}>
+        {children}
+      </AppStateDispathcContext.Provider>
     </AppStateContext.Provider>
   )
 }
 
 function useAppState() {
-  const context = React.useContext(AppStateContext)
-  if (!context) {
+  const state = React.useContext(AppStateContext)
+  if (!state) {
     throw new Error('useAppState must be used within the AppProvider')
   }
-  return context
+  return state ;
 }
 
+function useAppDispatch() {
+  const dispatch = React.useContext(AppStateDispathcContext)
+  if (!dispatch) {
+    throw new Error('useAppDispatch must be used within the AppProvider')
+  }
+  return dispatch ;
+}
+
+
 function Grid() {
-  const [, dispatch] = useAppState()
+  const dispatch = useAppDispatch()
   const [rows, setRows] = useDebouncedState(50)
   const [columns, setColumns] = useDebouncedState(50)
   const updateGridData = () => dispatch({type: 'UPDATE_GRID'})
